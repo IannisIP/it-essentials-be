@@ -1,6 +1,7 @@
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const bodyParser = require("body-parser");
+var cors = require("cors");
 
 require("events").EventEmitter.prototype._maxListeners = 100;
 
@@ -20,13 +21,25 @@ con.connect(function (err) {
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 
-app.get("/", (req, res, next) => {
+const whitelist = ["http://localhost:8080", "http://iteseentialshosted.com"];
+const corsOptions = {
+	origin: function (origin, callback) {
+		if (whitelist.indexOf(origin) !== -1) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"));
+		}
+	},
+};
+
+app.get("/", cors(corsOptions), (req, res, next) => {
 	console.log("Test");
 	res.send("<h1>Some html</h1>");
 });
 
-app.post("/orders", (req, res) => {
+app.post("/orders", cors(corsOptions), (req, res) => {
 	const body = req.body;
 	const userId = body.userId;
 	const deliveryMethod = body.deliveryMethod;
@@ -46,10 +59,8 @@ app.post("/orders", (req, res) => {
 	);
 });
 
-app.get("/carts", (req, res) => {
-	const body = req.body;
-	const userId = body.userId;
-
+app.get("/carts/:id", cors(corsOptions), (req, res) => {
+	const userId = parseInt(req.params.id);
 	con.query(
 		"SELECT * FROM carts WHERE userId=?",
 		[userId],
@@ -67,7 +78,7 @@ app.get("/carts", (req, res) => {
 	);
 });
 
-app.post("/carts", (req, res) => {
+app.post("/carts", cors(corsOptions), (req, res) => {
 	const body = req.body;
 	const userId = body.userId;
 	const cartProducts = body.products;
@@ -93,7 +104,7 @@ app.post("/carts", (req, res) => {
 				con.query(
 					"INSERT INTO `carts`(`userId`, `productId`, `quantity`,`created_at`, `updated_at`) " +
 						"VALUES (?,?,?,NOW(),NOW())",
-					[userId, product.id, product.quantity],
+					[userId, product.productId, product.quantity],
 					function (err, result, fields) {
 						con.on("error", function (err) {
 							console.log("MySQL ERROR", err);
@@ -108,7 +119,7 @@ app.post("/carts", (req, res) => {
 	);
 });
 
-app.put("/carts/", (req, res) => {
+app.put("/carts", cors(corsOptions), (req, res) => {
 	const body = req.body;
 	const userId = body.userId;
 	const productQuantity = body.quantity;
@@ -126,7 +137,7 @@ app.put("/carts/", (req, res) => {
 	});
 });
 
-app.delete("/carts", (req, res) => {
+app.delete("/carts", cors(corsOptions), (req, res) => {
 	const body = req.body;
 	const userId = body.userId;
 	const productId = body.productId;
@@ -142,7 +153,7 @@ app.delete("/carts", (req, res) => {
 	});
 });
 
-app.get("/products", (req, res) => {
+app.get("/products", cors(corsOptions), (req, res) => {
 	con.query("SELECT * FROM products", function (err, result, fields) {
 		con.on("error", function (err) {
 			console.log("[MySQL ERROR]", err);
