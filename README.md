@@ -1,6 +1,4 @@
-# pricing-module
-
-Frontend / backend implementation of a pricing module
+# ITEssentials be
 
 1. mysql -u root -p
    --Enter pw:
