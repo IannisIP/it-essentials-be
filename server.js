@@ -23,7 +23,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-const whitelist = ["http://localhost:8080", "http://iteseentialshosted.com"];
+const whitelist = [
+	"http://localhost:8080",
+	"https://itessentials-basic-web-app.herokuapp.com",
+];
 const corsOptions = {
 	origin: function (origin, callback) {
 		if (whitelist.indexOf(origin) !== -1) {
