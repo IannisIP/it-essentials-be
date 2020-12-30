@@ -26,6 +26,7 @@ app.use(cors());
 const whitelist = [
 	"http://localhost:8080",
 	"https://itessentials-basic-web-app.herokuapp.com",
+	"https://it-essentials-basic-backend.herokuapp.com",
 ];
 const corsOptions = {
 	origin: function (origin, callback) {
