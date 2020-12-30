@@ -6,11 +6,11 @@ var cors = require("cors");
 require("events").EventEmitter.prototype._maxListeners = 100;
 
 const con = mysql.createConnection({
-	host: "localhost",
+	host: "eu-cdbr-west-03.cleardb.net",
 	port: "3306",
-	user: "root",
-	password: "admin",
-	database: "itessentials",
+	user: "b53d1b77b77251",
+	password: "ad885c10",
+	database: "heroku_af3913d320e405e",
 });
 
 con.connect(function (err) {
