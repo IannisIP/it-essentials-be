@@ -157,7 +157,7 @@ app.delete("/carts", cors(corsOptions), (req, res) => {
 	});
 });
 
-app.get("/products", cors(corsOptions), (req, res) => {
+app.get("/products", cors(), (req, res) => {
 	con.query("SELECT * FROM products", function (err, result, fields) {
 		con.on("error", function (err) {
 			console.log("[MySQL ERROR]", err);
