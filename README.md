@@ -1,5 +1,12 @@
 # ITEssentials be
 
+### Performance analysis
+
+K6 Performance analysis is avaiable here (currently only /products is analysed, but similar performance is expected for the other endpoints):
+[https://app.k6.io/runs/public/65563f1ede37440e83588441897f8e50]
+
+### Setup
+
 1. mysql -u root -p
    --Enter pw:
 
