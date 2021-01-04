@@ -16,10 +16,10 @@ const pool = mysql.createPool({
 	queueLimit: 0,
 });
 
-pool.connect(function (err) {
-	if (err) throw err;
-	console.log("Connected!");
-});
+// pool.connect(function (err) {
+// 	if (err) throw err;
+// 	console.log("Connected!");
+// });
 
 const app = express();
 app.use(bodyParser.json());
