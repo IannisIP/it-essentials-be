@@ -5,15 +5,18 @@ var cors = require("cors");
 
 require("events").EventEmitter.prototype._maxListeners = 100;
 
-const con = mysql.createConnection({
+const pool = mysql.createConnection({
 	host: "eu-cdbr-west-03.cleardb.net",
 	port: "3306",
 	user: "b53d1b77b77251",
 	password: "ad885c10",
 	database: "heroku_af3913d320e405e",
+	waitForConnections: true,
+	connectionLimit: 10,
+	queueLimit: 0,
 });
 
-con.connect(function (err) {
+pool.connect(function (err) {
 	if (err) throw err;
 	console.log("Connected!");
 });
@@ -50,12 +53,12 @@ app.post("/orders", cors(corsOptions), (req, res) => {
 	const dateFacturare = body.dateFacturare;
 	const metodaPlata = body.metodaPlata;
 
-	con.query(
+	pool.query(
 		"INSERT INTO `orders`(`userId`, `deliveryMethod`, `dateFacturare`, `metodaPlata`, `created_at`, `updated_at`) " +
 			"VALUES (?,?,?,?,NOW(),NOW())",
 		[userId, deliveryMethod, dateFacturare, metodaPlata],
 		function (err, result, fields) {
-			con.on("error", function (err) {
+			pool.on("error", function (err) {
 				console.log("MySQL ERROR", err);
 			});
 			res.status(200);
@@ -65,11 +68,11 @@ app.post("/orders", cors(corsOptions), (req, res) => {
 
 app.get("/carts/:id", cors(corsOptions), (req, res) => {
 	const userId = parseInt(req.params.id);
-	con.query(
+	pool.query(
 		"SELECT * FROM carts WHERE userId=?",
 		[userId],
 		function (err, result, fields) {
-			con.on("error", function (err) {
+			pool.on("error", function (err) {
 				console.log("[MySQL ERROR]", err);
 			});
 			if (result && result.length) {
@@ -87,17 +90,17 @@ app.post("/carts", cors(corsOptions), (req, res) => {
 	const userId = body.userId;
 	const cartProducts = body.products;
 
-	con.query(
+	pool.query(
 		"SELECT * FROM carts where userId=?",
 		[userId],
 		function (err, result, fields) {
-			con.on("error", function (err) {
+			pool.on("error", function (err) {
 				console.log("[MySQL ERROR", err);
 			});
 			if (result && result.length) {
 				result.forEach((order) => {
 					const sql = "DELETE FROM carts WHERE userId=? AND id=?";
-					con.query(sql, [userId, order.id], function (err, result) {
+					pool.query(sql, [userId, order.id], function (err, result) {
 						if (err) throw err;
 						console.log("Product deleted from chart: " + result.affectedRows);
 						console.log("Deleted" + result);
@@ -105,12 +108,12 @@ app.post("/carts", cors(corsOptions), (req, res) => {
 				});
 			}
 			cartProducts.forEach((product) => {
-				con.query(
+				pool.query(
 					"INSERT INTO `carts`(`userId`, `productId`, `quantity`,`created_at`, `updated_at`) " +
 						"VALUES (?,?,?,NOW(),NOW())",
 					[userId, product.productId, product.quantity],
 					function (err, result, fields) {
-						con.on("error", function (err) {
+						pool.on("error", function (err) {
 							console.log("MySQL ERROR", err);
 						});
 						console.log("Added cart" + result);
@@ -132,7 +135,7 @@ app.put("/carts", cors(corsOptions), (req, res) => {
 	const sql =
 		"UPDATE carts SET quantity=? , updated_at=NOW() WHERE userId=? && productId=?";
 
-	con.query(sql, [productQuantity, userId, productId], function (err, result) {
+	pool.query(sql, [productQuantity, userId, productId], function (err, result) {
 		if (err) throw err;
 		console.log("Cart updated: " + result.affectedRows);
 		console.log("Updated" + result);
@@ -148,7 +151,7 @@ app.delete("/carts", cors(corsOptions), (req, res) => {
 
 	const sql = "DELETE FROM carts WHERE userId=? && productId=?";
 
-	con.query(sql, [userId, productId], function (err, result) {
+	pool.query(sql, [userId, productId], function (err, result) {
 		if (err) throw err;
 		console.log("Product deleted from chart: " + result.affectedRows);
 		console.log("Deleted" + result);
@@ -158,10 +161,11 @@ app.delete("/carts", cors(corsOptions), (req, res) => {
 });
 
 app.get("/products", cors(), (req, res) => {
-	con.query("SELECT * FROM products", function (err, result, fields) {
-		con.on("error", function (err) {
+	pool.query("SELECT * FROM products", function (err, result, fields) {
+		pool.on("error", function (err) {
 			console.log("[MySQL ERROR]", err);
 		});
+		pool.on("");
 		if (result && result.length) {
 			console.log(result);
 			res.status(200);
