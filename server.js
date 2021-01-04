@@ -5,7 +5,7 @@ var cors = require("cors");
 
 require("events").EventEmitter.prototype._maxListeners = 100;
 
-const pool = mysql.createConnection({
+const pool = mysql.createPool({
 	host: "eu-cdbr-west-03.cleardb.net",
 	port: "3306",
 	user: "b53d1b77b77251",
@@ -165,7 +165,6 @@ app.get("/products", cors(), (req, res) => {
 		pool.on("error", function (err) {
 			console.log("[MySQL ERROR]", err);
 		});
-		pool.on("");
 		if (result && result.length) {
 			console.log(result);
 			res.status(200);
